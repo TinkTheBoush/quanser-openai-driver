@@ -6,7 +6,6 @@ import numpy as np
 from gym import spaces
 from gym_brt.envs.qube_base_env import \
     QubeBaseEnv, \
-    normalize_angle, \
     ACTION_HIGH, \
     ACTION_LOW
 
@@ -24,18 +23,20 @@ class QubeBeginDownReward(object):
         alpha_y = state[3]
         theta_velocity = state[4]
         alpha_velocity = state[5]
-        theta_acceleration = state[6]
-        alpha_acceleration = state[7]
 
         theta = np.arctan2(theta_y, theta_x)  # arm
         alpha = np.arctan2(alpha_y, alpha_x)  # pole
 
-        cost = normalize_angle(theta)**4 + \
-            normalize_angle(alpha)**2 + \
-            0.1 * alpha_velocity**2
-
-        reward = -cost
-        return reward
+        '''
+        cost = theta**4 + \
+            alpha**2 + \
+            0.01 * alpha_velocity**2
+        '''
+        done = theta_x < -0.5
+        cost = (1 - alpha_x)**4 + 0.1*(1 + theta_x)**4 + \
+            0.1 * np.abs(alpha_velocity)
+        reward =  np.clip((5 - cost)/10,-1e-5,1) + (-20 if done else 0)
+        return reward,done
 
 
 class QubeBeginDownEnv(QubeBaseEnv):
@@ -44,6 +45,16 @@ class QubeBeginDownEnv(QubeBaseEnv):
             frequency=frequency,
             use_simulator=use_simulator)
         self.reward_fn = QubeBeginDownReward()
+        self._old_tach0 = 0
+
+    def reset(self):
+        return self._dampen_down()
+
+
+    def step(self, action):
+        state, reward, done, info = super(QubeBeginDownEnv, self).step(action)
+        reward = reward
+        return state, reward, done, info
 
 
 def main():

@@ -63,7 +63,7 @@ def print_info(state_keys, state, action, reward):
 def test_env(env_name,
              controller,
              num_episodes=10,
-             num_steps=250,
+             num_steps=2000,
              frequency=1000,
              state_keys=None,
              use_simulator=False,
@@ -141,7 +141,7 @@ def main():
     parser.add_argument(
         '-c',
         '--control',
-        default='random',
+        default='qube',
         choices=list(controllers.keys()),
         help='Select what type of action to take.')
     parser.add_argument(
@@ -151,7 +151,7 @@ def main():
         help='Number of episodes to run.')
     parser.add_argument(
         '--num-steps',
-        default='10000',
+        default='500000',
         type=int,
         help='Number of step to run per episode.')
     parser.add_argument(

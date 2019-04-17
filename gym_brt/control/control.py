@@ -131,8 +131,8 @@ class QubeFlipUpControl(Control):
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         '''Implements a energy based swing-up controller'''
         mu = 50.0 # in m/s/J
-        ref_energy = 30.0 / 1000.0 # Er in joules
-        max_u = 6.0 # Max action is 6m/s^2
+        ref_energy = 31.0 / 1000.0 # Er in joules
+        max_u = 8.0 # Max action is 6m/s^2
 
         # System parameters
         jp = 3.3282e-5
@@ -151,7 +151,10 @@ class QubeFlipUpControl(Control):
         u = mu * (energy - ref_energy) * np.sign(-1 * np.cos(alpha) * alpha_dot)
         u = np.clip(u, -max_u, max_u)
 
-        torque = (mr * lr) * u
+        if u == 0:
+            torque = np.random.randn(1)[0]
+        else:
+            torque = (mr * lr) * u
         voltage = (rm / kt) * torque
         return -voltage
 
